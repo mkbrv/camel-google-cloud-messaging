@@ -42,7 +42,7 @@ public class SimpleSender extends GCMProducer {
     @Override
     public GCMResponse send(GCMBody message, String regId) {
         String requestBody = new PlainTextBodyBuilder(message, regId).build();
-        LOG.debug("Request body: {}", requestBody);
+        LOG.info("GCM: sending a POST with Request body: {}", requestBody);
         try {
             HttpURLConnection conn = post(GCM_SEND_ENDPOINT, "application/x-www-form-urlencoded;charset=UTF-8", requestBody);
             SimplePostResponseParser parser = new SimplePostResponseParser();
@@ -80,7 +80,7 @@ public class SimpleSender extends GCMProducer {
         conn.setFixedLengthStreamingMode(bytes.length);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", contentType);
-        conn.setRequestProperty("Authorization", "key=" + "KEY");
+        conn.setRequestProperty("Authorization", "key=" + apiKey);
         OutputStream out = conn.getOutputStream();
         try {
             out.write(bytes);

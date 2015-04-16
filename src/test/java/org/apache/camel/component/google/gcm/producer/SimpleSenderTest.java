@@ -2,6 +2,8 @@ package org.apache.camel.component.google.gcm.producer;
 
 import org.apache.camel.component.google.gcm.AbstractGCMTestSupport;
 import org.apache.camel.component.google.gcm.model.GCMBody;
+import org.apache.camel.component.google.gcm.model.GCMResponse;
+import org.apache.camel.component.google.gcm.producer.http.SimpleSender;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,10 +26,12 @@ public class SimpleSenderTest extends AbstractGCMTestSupport {
                 .collapseKey("test")
                 .timeToLive(3)
                 .delayWhileIdle(true)
-                .dryRun(true)
+                .dryRun(false)
                 .build();
 
-     //   GCMResponse response = gcmContext.getSimpleSender().send(message, testRegID);
-       // assertNotNull(response);
+        SimpleSender simpleSender = new SimpleSender(null, testProperties.get("gcmApiKey").toString());
+
+        GCMResponse response = simpleSender.send(message, testRegID);
+        assertNotNull(response);
     }
 }
