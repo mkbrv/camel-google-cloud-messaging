@@ -1,24 +1,20 @@
-package org.apache.camel.component.google.gcm;
+package org.apache.camel.component.google.gcm.producer;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.google.gcm.producer.constants.CamelHeaderConstants;
+import org.apache.camel.component.google.gcm.AbstractGCMTestSupport;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.Test;
 
-import java.util.HashMap;
-
-public class GCMComponentTest extends AbstractGCMTestSupport {
-
+/**
+ * Created by miki on 16.04.2015.
+ */
+public class TestGCMBody extends AbstractGCMTestSupport {
     @Test
     public void testGoogleCloudMessaging() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
-        mock.expectedMinimumMessageCount(1);
-        sendBody("direct:foo", "Hello World",
-                new HashMap<String, Object>() {
-                    {
-                        put(CamelHeaderConstants.TO, "test");
-                    }
-                });
+        mock.expectedMinimumMessageCount(3);
+        sendBody("direct:foo", "Hello World");
+
 
         assertMockEndpointsSatisfied();
     }
@@ -28,9 +24,10 @@ public class GCMComponentTest extends AbstractGCMTestSupport {
         return new RouteBuilder() {
             public void configure() {
                 from("direct:foo")
-                        .to("google-cloud-messaging://bar?apiKey=test")
+                        .to("google-cloud-messaging://test")
                         .to("mock:result");
             }
         };
     }
+
 }

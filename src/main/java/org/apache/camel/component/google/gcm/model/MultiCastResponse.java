@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Result of a GCM multicast message request .
  */
-public final class GCMMultiCastResponse implements Serializable {
+public final class MultiCastResponse implements Serializable {
 
     private final int success;
     private final int failure;
@@ -64,12 +64,12 @@ public final class GCMMultiCastResponse implements Serializable {
             return this;
         }
 
-        public GCMMultiCastResponse build() {
-            return new GCMMultiCastResponse(this);
+        public MultiCastResponse build() {
+            return new MultiCastResponse(this);
         }
     }
 
-    private GCMMultiCastResponse(Builder builder) {
+    private MultiCastResponse(Builder builder) {
         success = builder.success;
         failure = builder.failure;
         canonicalIds = builder.canonicalIds;
@@ -141,7 +141,7 @@ public final class GCMMultiCastResponse implements Serializable {
                 .append("failure=").append(failure).append(",")
                 .append("canonical_ids=").append(canonicalIds).append(",");
         if (!results.isEmpty()) {
-            builder.append("results: " + results);
+            builder.append("results: ").append(results);
         }
         return builder.toString();
     }

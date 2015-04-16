@@ -17,14 +17,16 @@ import java.util.Properties;
 public class AbstractGCMTestSupport extends CamelTestSupport {
 
     private static final String TEST_OPTIONS_PROPERTIES = "/test-options.properties";
+    protected Properties testProperties;
 
     @Override
     protected CamelContext createCamelContext() throws Exception {
         final CamelContext context = super.createCamelContext();
-        final Properties properties = readProperties(TEST_OPTIONS_PROPERTIES);
+        testProperties = readProperties(TEST_OPTIONS_PROPERTIES);
+
 
         Map<String, Object> options = new HashMap<String, Object>();
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+        for (Map.Entry<Object, Object> entry : testProperties.entrySet()) {
             options.put(entry.getKey().toString(), entry.getValue());
         }
 

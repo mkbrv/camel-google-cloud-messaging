@@ -1,4 +1,4 @@
-package org.apache.camel.component.google.gcm.client;
+package org.apache.camel.component.google.gcm.producer.exceptions;
 /*
  * Copyright 2012 Google Inc.
  *

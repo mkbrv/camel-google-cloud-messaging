@@ -15,6 +15,8 @@ package org.apache.camel.component.google.gcm.model;
  * limitations under the License.
  */
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -29,12 +31,12 @@ import java.util.Map;
  * <p/>
  * <strong>Simplest message:</strong>
  * <pre><code>
- * Message message = new Message.Builder().build();
+ * GCMBody message = new GCMBody.Builder().build();
  * </pre></code>
  * <p/>
- * <strong>Message with optional attributes:</strong>
+ * <strong>GCMBody with optional attributes:</strong>
  * <pre><code>
- * Message message = new Message.Builder()
+ * GCMBody message = new GCMBody.Builder()
  *    .collapseKey(collapseKey)
  *    .timeToLive(3)
  *    .delayWhileIdle(true)
@@ -43,9 +45,9 @@ import java.util.Map;
  *    .build();
  * </pre></code>
  * <p/>
- * <strong>Message with optional attributes and payload data:</strong>
+ * <strong>GCMBody with optional attributes and payload data:</strong>
  * <pre><code>
- * Message message = new Message.Builder()
+ * GCMBody message = new GCMBody.Builder()
  *    .collapseKey(collapseKey)
  *    .timeToLive(3)
  *    .delayWhileIdle(true)
@@ -56,7 +58,7 @@ import java.util.Map;
  *    .build();
  * </pre></code>
  */
-public final class GCMessage implements Serializable {
+public final class GCMBody implements Serializable {
 
     private final String collapseKey;
     private final Boolean delayWhileIdle;
@@ -91,7 +93,7 @@ public final class GCMessage implements Serializable {
         /**
          * Sets the delayWhileIdle property (default value is {@literal false}).
          */
-        public Builder delayWhileIdle(boolean value) {
+        public Builder delayWhileIdle(Boolean value) {
             delayWhileIdle = value;
             return this;
         }
@@ -99,7 +101,7 @@ public final class GCMessage implements Serializable {
         /**
          * Sets the time to live, in seconds.
          */
-        public Builder timeToLive(int value) {
+        public Builder timeToLive(Integer value) {
             timeToLive = value;
             return this;
         }
@@ -113,9 +115,20 @@ public final class GCMessage implements Serializable {
         }
 
         /**
+         * adds a map to the payload data;
+         *
+         * @param data
+         * @return
+         */
+        public Builder addData(Map<String, String> data) {
+            this.data.putAll(data);
+            return this;
+        }
+
+        /**
          * Sets the dryRun property (default value is {@literal false}).
          */
-        public Builder dryRun(boolean value) {
+        public Builder dryRun(Boolean value) {
             dryRun = value;
             return this;
         }
@@ -128,13 +141,13 @@ public final class GCMessage implements Serializable {
             return this;
         }
 
-        public GCMessage build() {
-            return new GCMessage(this);
+        public GCMBody build() {
+            return new GCMBody(this);
         }
 
     }
 
-    private GCMessage(Builder builder) {
+    private GCMBody(Builder builder) {
         collapseKey = builder.collapseKey;
         delayWhileIdle = builder.delayWhileIdle;
         data = Collections.unmodifiableMap(builder.data);
@@ -187,7 +200,7 @@ public final class GCMessage implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("Message(");
+        StringBuilder builder = new StringBuilder("GCMBody(");
         if (collapseKey != null) {
             builder.append("collapseKey=").append(collapseKey).append(", ");
         }

@@ -14,16 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.component.google.gcm.client;
+package org.apache.camel.component.google.gcm.oldclient;
 
-import org.apache.camel.component.google.gcm.model.GCMMultiCastResponse;
+import org.apache.camel.component.google.gcm.model.GCMBody;
 import org.apache.camel.component.google.gcm.model.GCMResponse;
-import org.apache.camel.component.google.gcm.model.GCMessage;
-import static org.apache.camel.component.google.gcm.client.GoogleConstants.*;
+import org.apache.camel.component.google.gcm.producer.exceptions.InvalidRequestException;
+import org.apache.camel.component.google.gcm.model.MultiCastResponse;
+
+import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.*;
+
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -40,28 +46,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 /**
  * Helper class to send messages to the GCM service using an API Key.
  */
 public class GoogleCloudSender {
 
-    protected static final String UTF8 = "UTF-8";
-
-    /**
-     * Initial delay before first retry, without jitter.
-     */
-    protected static final int BACKOFF_INITIAL_DELAY = 1000;
-    /**
-     * Maximum delay before a retry.
-     */
-    protected static final int MAX_BACKOFF_DELAY = 1024000;
-
     protected final Random random = new Random();
-    protected static final Logger logger =
-            Logger.getLogger(GoogleCloudSender.class.getName());
-
+    protected static final Logger logger = LoggerFactory.getLogger(GoogleCloudSender.class);
     private final String key;
 
     /**
@@ -74,22 +67,22 @@ public class GoogleCloudSender {
     }
 
     /**
-     * Sends a message to one device, retrying in case of unavailability.
+     * Sends a GCMBody to one device, retrying in case of unavailability.
      * <p/>
      * <p/>
      * <strong>Note: </strong> this method uses exponential back-off to retry in
      * case of service unavailability and hence could block the calling thread
      * for many seconds.
      *
-     * @param message        message to be sent, including the device's registration id.
-     * @param registrationId device where the message will be sent.
+     * @param GCMBody        GCMBody to be sent, including the device's registration id.
+     * @param registrationId device where the GCMBody will be sent.
      * @param retries        number of retries in case of service unavailability errors.
      * @return result of the request (see its javadoc for more details).
      * @throws IllegalArgumentException if registrationId is {@literal null}.
      * @throws InvalidRequestException  if GCM didn't returned a 200 or 5xx status.
-     * @throws IOException              if message could not be sent.
+     * @throws IOException              if GCMBody could not be sent.
      */
-    public GCMResponse send(GCMessage message, String registrationId, int retries)
+    public GCMResponse send(GCMBody GCMBody, String registrationId, int retries)
             throws IOException {
         int attempt = 0;
         GCMResponse result = null;
@@ -97,11 +90,8 @@ public class GoogleCloudSender {
         boolean tryAgain;
         do {
             attempt++;
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Attempt #" + attempt + " to send message " +
-                        message + " to regIds " + registrationId);
-            }
-            result = sendNoRetry(message, registrationId);
+            logger.warn("Attempt #{}  to send GCMBody {} to regIds {}" + String.valueOf(attempt), GCMBody, registrationId);
+            result = sendNoRetry(GCMBody, registrationId);
             tryAgain = result == null && attempt <= retries;
             if (tryAgain) {
                 int sleepTime = backoff / 2 + random.nextInt(backoff);
@@ -112,7 +102,7 @@ public class GoogleCloudSender {
             }
         } while (tryAgain);
         if (result == null) {
-            throw new IOException("Could not send message after " + attempt +
+            throw new IOException("Could not send GCMBody after " + attempt +
                     " attempts");
         }
         return result;
@@ -120,78 +110,78 @@ public class GoogleCloudSender {
 
     /**
      * Sends a message without retrying in case of service unavailability. See
-     * {@link #send(GCMessage, String, int)} for more info.
+     * {@link #send(GCMBody, String, int)} for more info.
      *
      * @return result of the post, or {@literal null} if the GCM service was
-     * unavailable or any network exception caused the request to fail.
+     * unavailable or any network exceptions caused the request to fail.
      * @throws InvalidRequestException  if GCM didn't returned a 200 or 5xx status.
      * @throws IllegalArgumentException if registrationId is {@literal null}.
      */
-    public GCMResponse sendNoRetry(GCMessage message, String registrationId)
+    public GCMResponse sendNoRetry(GCMBody GCMBody, String registrationId)
             throws IOException {
         StringBuilder body = newBody(PARAM_REGISTRATION_ID, registrationId);
-        Boolean delayWhileIdle = message.isDelayWhileIdle();
+        Boolean delayWhileIdle = GCMBody.isDelayWhileIdle();
         if (delayWhileIdle != null) {
             addParameter(body, PARAM_DELAY_WHILE_IDLE, delayWhileIdle ? "1" : "0");
         }
-        Boolean dryRun = message.isDryRun();
+        Boolean dryRun = GCMBody.isDryRun();
         if (dryRun != null) {
             addParameter(body, PARAM_DRY_RUN, dryRun ? "1" : "0");
         }
-        String collapseKey = message.getCollapseKey();
+        String collapseKey = GCMBody.getCollapseKey();
         if (collapseKey != null) {
             addParameter(body, PARAM_COLLAPSE_KEY, collapseKey);
         }
-        String restrictedPackageName = message.getRestrictedPackageName();
+        String restrictedPackageName = GCMBody.getRestrictedPackageName();
         if (restrictedPackageName != null) {
             addParameter(body, PARAM_RESTRICTED_PACKAGE_NAME, restrictedPackageName);
         }
-        Integer timeToLive = message.getTimeToLive();
+        Integer timeToLive = GCMBody.getTimeToLive();
         if (timeToLive != null) {
             addParameter(body, PARAM_TIME_TO_LIVE, Integer.toString(timeToLive));
         }
-        for (Entry<String, String> entry : message.getData().entrySet()) {
+        for (Entry<String, String> entry : GCMBody.getData().entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             if (key == null || value == null) {
-                logger.warning("Ignoring payload entry thas has null: " + entry);
+                logger.warn("Ignoring payload entry thas has null: {} ", entry);
             } else {
                 key = PARAM_PAYLOAD_PREFIX + key;
                 addParameter(body, key, URLEncoder.encode(value, UTF8));
             }
         }
         String requestBody = body.toString();
-        logger.finest("Request body: " + requestBody);
+        logger.debug("Request body: {}", requestBody);
         HttpURLConnection conn;
         int status;
         try {
             conn = post(GCM_SEND_ENDPOINT, requestBody);
             status = conn.getResponseCode();
         } catch (IOException e) {
-            logger.log(Level.FINE, "IOException posting to GCM", e);
+            logger.error("IOException posting to GCM", e);
             return null;
         }
         if (status / 100 == 5) {
-            logger.fine("GCM service is unavailable (status " + status + ")");
+            logger.debug("GCM service is unavailable (status " + status + ")");
             return null;
         }
         String responseBody;
         if (status != 200) {
             try {
                 responseBody = getAndClose(conn.getErrorStream());
-                logger.finest("Plain post error response: " + responseBody);
+                logger.debug("Plain post error response: " + responseBody);
             } catch (IOException e) {
-                // ignore the exception since it will thrown an InvalidRequestException
+                // ignore the exceptions since it will thrown an InvalidRequestException
                 // anyways
                 responseBody = "N/A";
-                logger.log(Level.FINE, "Exception reading response: ", e);
+                log(Level.WARNING, "Exception reading response: ", e);
             }
             throw new InvalidRequestException(status, responseBody);
         } else {
             try {
                 responseBody = getAndClose(conn.getInputStream());
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Exception reading response: ", e);
+                log(Level.WARNING, "Exception reading response: ", e);
                 // return null so it can retry
                 return null;
             }
@@ -215,12 +205,12 @@ public class GoogleCloudSender {
                 if (token.equals(TOKEN_CANONICAL_REG_ID)) {
                     builder.canonicalRegistrationId(value);
                 } else {
-                    logger.warning("Invalid response from GCM: " + responseBody);
+                    logger.warn("Invalid response from GCM: " + responseBody);
                 }
             }
             GCMResponse result = builder.build();
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Message created succesfully (" + result + ")");
+            if (logger.isDebugEnabled()) {
+                logger.debug("GCMBody created succesfully (" + result + ")");
             }
             return result;
         } else if (token.equals(TOKEN_ERROR)) {
@@ -231,27 +221,27 @@ public class GoogleCloudSender {
     }
 
     /**
-     * Sends a message to many devices, retrying in case of unavailability.
+     * Sends a GCMBody to many devices, retrying in case of unavailability.
      * <p/>
      * <p/>
      * <strong>Note: </strong> this method uses exponential back-off to retry in
      * case of service unavailability and hence could block the calling thread
      * for many seconds.
      *
-     * @param message message to be sent.
+     * @param GCMBody GCMBody to be sent.
      * @param regIds  registration id of the devices that will receive
-     *                the message.
+     *                the GCMBody.
      * @param retries number of retries in case of service unavailability errors.
      * @return combined result of all requests made.
      * @throws IllegalArgumentException if registrationIds is {@literal null} or
      *                                  empty.
      * @throws InvalidRequestException  if GCM didn't returned a 200 or 503 status.
-     * @throws IOException              if message could not be sent.
+     * @throws IOException              if GCMBody could not be sent.
      */
-    public GCMMultiCastResponse send(GCMessage message, List<String> regIds, int retries)
+    public MultiCastResponse send(GCMBody GCMBody, List<String> regIds, int retries)
             throws IOException {
         int attempt = 0;
-        GCMMultiCastResponse multicastResult;
+        MultiCastResponse multicastResult;
         int backoff = BACKOFF_INITIAL_DELAY;
         // Map of results by registration id, it will be updated after each attempt
         // to send the messages
@@ -262,19 +252,19 @@ public class GoogleCloudSender {
         do {
             multicastResult = null;
             attempt++;
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Attempt #" + attempt + " to send message " +
-                        message + " to regIds " + unsentRegIds);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Attempt #" + attempt + " to send GCMBody " +
+                        GCMBody + " to regIds " + unsentRegIds);
             }
             try {
-                multicastResult = sendNoRetry(message, unsentRegIds);
+                multicastResult = sendNoRetry(GCMBody, unsentRegIds);
             } catch (IOException e) {
-                // no need for WARNING since exception might be already logged
-                logger.log(Level.FINEST, "IOException on attempt " + attempt, e);
+                // no need for WARNING since exceptions might be already logged
+                log(Level.WARNING, "IOException on attempt " + attempt, e);
             }
             if (multicastResult != null) {
                 long multicastId = multicastResult.getMulticastId();
-                logger.fine("multicast_id on attempt # " + attempt + ": " +
+                logger.debug("multicast_id on attempt # " + attempt + ": " +
                         multicastId);
                 multicastIds.add(multicastId);
                 unsentRegIds = updateStatus(unsentRegIds, results, multicastResult);
@@ -309,7 +299,7 @@ public class GoogleCloudSender {
         }
         // build a new object with the overall result
         long multicastId = multicastIds.remove(0);
-        GCMMultiCastResponse.Builder builder = new GCMMultiCastResponse.Builder(success,
+        MultiCastResponse.Builder builder = new MultiCastResponse.Builder(success,
                 failure, canonicalIds, multicastId).retryMulticastIds(multicastIds);
         // add results, in the same order as the input
         for (String regId : regIds) {
@@ -329,7 +319,7 @@ public class GoogleCloudSender {
      * @return updated version of devices that should be retried.
      */
     private List<String> updateStatus(List<String> unsentRegIds,
-                                      Map<String, GCMResponse> allResults, GCMMultiCastResponse multicastResult) {
+                                      Map<String, GCMResponse> allResults, MultiCastResponse multicastResult) {
         List<GCMResponse> results = multicastResult.getResults();
         if (results.size() != unsentRegIds.size()) {
             // should never happen, unless there is a flaw in the algorithm
@@ -352,7 +342,7 @@ public class GoogleCloudSender {
 
     /**
      * Sends a message without retrying in case of service unavailability. See
-     * {@link #send(GCMessage, List, int)} for more info.
+     * {@link #send(GCMBody, List, int)} for more info.
      *
      * @return multicast results if the message was sent successfully,
      * {@literal null} if it failed but could be retried.
@@ -361,54 +351,54 @@ public class GoogleCloudSender {
      * @throws InvalidRequestException  if GCM didn't returned a 200 status.
      * @throws IOException              if there was a JSON parsing error
      */
-    public GCMMultiCastResponse sendNoRetry(GCMessage message,
-                                               List<String> registrationIds) throws IOException {
+    public MultiCastResponse sendNoRetry(GCMBody GCMBody,
+                                            List<String> registrationIds) throws IOException {
         if (nonNull(registrationIds).isEmpty()) {
             throw new IllegalArgumentException("registrationIds cannot be empty");
         }
         Map<Object, Object> jsonRequest = new HashMap<Object, Object>();
-        setJsonField(jsonRequest, PARAM_TIME_TO_LIVE, message.getTimeToLive());
-        setJsonField(jsonRequest, PARAM_COLLAPSE_KEY, message.getCollapseKey());
-        setJsonField(jsonRequest, PARAM_RESTRICTED_PACKAGE_NAME, message.getRestrictedPackageName());
+        setJsonField(jsonRequest, PARAM_TIME_TO_LIVE, GCMBody.getTimeToLive());
+        setJsonField(jsonRequest, PARAM_COLLAPSE_KEY, GCMBody.getCollapseKey());
+        setJsonField(jsonRequest, PARAM_RESTRICTED_PACKAGE_NAME, GCMBody.getRestrictedPackageName());
         setJsonField(jsonRequest, PARAM_DELAY_WHILE_IDLE,
-                message.isDelayWhileIdle());
-        setJsonField(jsonRequest, PARAM_DRY_RUN, message.isDryRun());
+                GCMBody.isDelayWhileIdle());
+        setJsonField(jsonRequest, PARAM_DRY_RUN, GCMBody.isDryRun());
         jsonRequest.put(JSON_REGISTRATION_IDS, registrationIds);
-        Map<String, String> payload = message.getData();
+        Map<String, String> payload = GCMBody.getData();
         if (!payload.isEmpty()) {
             jsonRequest.put(JSON_PAYLOAD, payload);
         }
         String requestBody = JSONValue.toJSONString(jsonRequest);
-        logger.finest("JSON request: " + requestBody);
+        logger.debug("JSON request: " + requestBody);
         HttpURLConnection conn;
         int status;
         try {
             conn = post(GCM_SEND_ENDPOINT, "application/json", requestBody);
             status = conn.getResponseCode();
         } catch (IOException e) {
-            logger.log(Level.FINE, "IOException posting to GCM", e);
+            log(Level.WARNING, "IOException posting to GCM", e);
             return null;
         }
         String responseBody;
         if (status != 200) {
             try {
                 responseBody = getAndClose(conn.getErrorStream());
-                logger.finest("JSON error response: " + responseBody);
+                logger.debug("JSON error response: " + responseBody);
             } catch (IOException e) {
-                // ignore the exception since it will thrown an InvalidRequestException
+                // ignore the exceptions since it will thrown an InvalidRequestException
                 // anyways
                 responseBody = "N/A";
-                logger.log(Level.FINE, "Exception reading response: ", e);
+                log(Level.WARNING, "Exception reading response: ", e);
             }
             throw new InvalidRequestException(status, responseBody);
         }
         try {
             responseBody = getAndClose(conn.getInputStream());
         } catch (IOException e) {
-            logger.log(Level.WARNING, "IOException reading response", e);
+            log(Level.WARNING, "IOException reading response", e);
             return null;
         }
-        logger.finest("JSON response: " + responseBody);
+        logger.debug("JSON response: " + responseBody);
         JSONParser parser = new JSONParser();
         JSONObject jsonResponse;
         try {
@@ -417,7 +407,7 @@ public class GoogleCloudSender {
             int failure = getNumber(jsonResponse, JSON_FAILURE).intValue();
             int canonicalIds = getNumber(jsonResponse, JSON_CANONICAL_IDS).intValue();
             long multicastId = getNumber(jsonResponse, JSON_MULTICAST_ID).longValue();
-            GCMMultiCastResponse.Builder builder = new GCMMultiCastResponse.Builder(success,
+            MultiCastResponse.Builder builder = new MultiCastResponse.Builder(success,
                     failure, canonicalIds, multicastId);
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> results =
@@ -436,7 +426,7 @@ public class GoogleCloudSender {
                     builder.addResult(result);
                 }
             }
-            GCMMultiCastResponse multicastResult = builder.build();
+            MultiCastResponse multicastResult = builder.build();
             return multicastResult;
         } catch (ParseException e) {
             throw newIoException(responseBody, e);
@@ -446,11 +436,15 @@ public class GoogleCloudSender {
     }
 
     private IOException newIoException(String responseBody, Exception e) {
-        // log exception, as IOException constructor that takes a message and cause
+        // log exceptions, as IOException constructor that takes a message and cause
         // is only available on Java 6
         String msg = "Error parsing JSON response (" + responseBody + ")";
-        logger.log(Level.WARNING, msg, e);
+        log(Level.WARNING, msg, e);
         return new IOException(msg + ":" + e);
+    }
+    
+    private static void log(Object obj, Object ob3j, Object obj2){
+        
     }
 
     private static void close(Closeable closeable) {
@@ -459,7 +453,7 @@ public class GoogleCloudSender {
                 closeable.close();
             } catch (IOException e) {
                 // ignore error
-                logger.log(Level.FINEST, "IOException closing stream", e);
+                log(Level.WARNING, "IOException closing stream", e);
             }
         }
     }
@@ -529,10 +523,10 @@ public class GoogleCloudSender {
             throw new IllegalArgumentException("arguments cannot be null");
         }
         if (!url.startsWith("https://")) {
-            logger.warning("URL does not use https: " + url);
+            log("URL does not use https: ", "", url);
         }
-        logger.fine("Sending POST to " + url);
-        logger.finest("POST body: " + body);
+        logger.debug("Sending POST to " + url);
+        logger.debug("POST body: " + body);
         byte[] bytes = body.getBytes();
         HttpURLConnection conn = getConnection(url);
         conn.setDoOutput(true);

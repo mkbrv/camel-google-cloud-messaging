@@ -1,4 +1,4 @@
-package org.apache.camel.component.google.gcm.client;
+package org.apache.camel.component.google.gcm.oldclient;
 
 /**
  * Created by miki on 02.04.2015.
@@ -29,6 +29,17 @@ public final class GoogleConstants {
      */
     public static final String GCM_SEND_ENDPOINT =
             "https://android.googleapis.com/gcm/send";
+
+    public static final String UTF8 = "UTF-8";
+
+    /**
+     * Initial delay before first retry, without jitter.
+     */
+    protected static final int BACKOFF_INITIAL_DELAY = 1000;
+    /**
+     * Maximum delay before a retry.
+     */
+    protected static final int MAX_BACKOFF_DELAY = 1024000;
 
     /**
      * HTTP parameter for registration id.
@@ -98,7 +109,7 @@ public final class GoogleConstants {
     /**
      * The user has uninstalled the application or turned off notifications.
      * Sender should stop sending messages to this device and delete the
-     * registration_id. The client needs to re-register with the GCM servers to
+     * registration_id. The oldclient needs to re-register with the GCM servers to
      * receive notifications again.
      */
     public static final String ERROR_NOT_REGISTERED = "NotRegistered";
