@@ -3,8 +3,10 @@ package org.apache.camel.component.google.gcm.producer.http;
 import org.apache.camel.component.google.gcm.GCMEndpoint;
 import org.apache.camel.component.google.gcm.model.GCMBody;
 import org.apache.camel.component.google.gcm.producer.GCMProducer;
-import org.apache.camel.component.google.gcm.producer.builders.PlainTextBodyBuilder;
-import org.apache.camel.component.google.gcm.producer.parsers.SimplePostResponseParser;
+import org.apache.camel.component.google.gcm.producer.builders.JsonBuilder;
+import org.apache.camel.component.google.gcm.producer.builders.HTTPostBuilder;
+import org.apache.camel.component.google.gcm.producer.parsers.MultiCastParser;
+import org.apache.camel.component.google.gcm.producer.parsers.SimpleParser;
 import org.apache.camel.component.google.gcm.model.GCMResponse;
 import org.apache.camel.component.google.gcm.model.MultiCastResponse;
 import org.slf4j.Logger;
@@ -29,9 +31,24 @@ public class SimpleSender extends GCMProducer {
         super(endpoint, apiKey);
     }
 
+    /**
+     * @param message            to be pushed to GCM; (body of camel message ) ;
+     * @param registrationIdList device id list where to send
+     * @return response from google;
+     */
     @Override
-    public MultiCastResponse send(GCMBody message, Set<String> regIds) {
-        return null;
+    public MultiCastResponse send(GCMBody message, Set<String> registrationIdList) {
+        String requestBody = new JsonBuilder(message, registrationIdList).build();
+        try {
+            HttpURLConnection conn = post(GCM_SEND_ENDPOINT, "application/json", requestBody);
+            MultiCastParser parser = new MultiCastParser();
+            String response = parser.getResponseFromConnection(conn);
+            LOG.info("GCM: received response {}", response);
+            return parser.parseResponseString(response);
+        } catch (Exception e) {
+            LOG.error("Exception posting to GCM", e);
+            return null;
+        }
     }
 
     /**
@@ -41,12 +58,13 @@ public class SimpleSender extends GCMProducer {
      */
     @Override
     public GCMResponse send(GCMBody message, String regId) {
-        String requestBody = new PlainTextBodyBuilder(message, regId).build();
+        String requestBody = new HTTPostBuilder(message, regId).build();
         LOG.info("GCM: sending a POST with Request body: {}", requestBody);
         try {
             HttpURLConnection conn = post(GCM_SEND_ENDPOINT, "application/x-www-form-urlencoded;charset=UTF-8", requestBody);
-            SimplePostResponseParser parser = new SimplePostResponseParser();
+            SimpleParser parser = new SimpleParser();
             String response = parser.getResponseFromConnection(conn);
+            LOG.info("GCM: received response {}", response);
             return parser.parseResponseString(response);
         } catch (Exception e) {
             LOG.error("Exception posting to GCM", e);

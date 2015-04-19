@@ -38,11 +38,25 @@ import static org.apache.camel.component.google.gcm.producer.constants.Util.nonN
  */
 
 public abstract class GCMProducer extends DefaultProducer implements IGCMProducer {
+    /**
+     *
+     */
     private static final Logger LOG = LoggerFactory.getLogger(GCMProducer.class);
 
+    /**
+     * APIKey used only once in an endpoint; Wanna do it twice? Use another endpoint
+     */
     protected final String apiKey;
+    /**
+     * The endpoint;
+     */
     protected final GCMEndpoint endpoint;
 
+    /**
+     *
+     * @param endpoint
+     * @param apiKey from google
+     */
     public GCMProducer(GCMEndpoint endpoint, final String apiKey) {
         super(endpoint);
         this.endpoint = endpoint;
@@ -86,7 +100,7 @@ public abstract class GCMProducer extends DefaultProducer implements IGCMProduce
      * @return
      */
     private GCMBody getMessageFromBodyOrHeaders(Message camelMessage) {
-        GCMBody message = null;
+        GCMBody message;
         if (nonNull(camelMessage.getBody()) instanceof GCMBody) {
             //cool we already have the GCM Message in the body;
             message = (GCMBody) camelMessage.getBody();
@@ -100,7 +114,7 @@ public abstract class GCMProducer extends DefaultProducer implements IGCMProduce
     /**
      * Headers have priority over whatever is configured in the endpoint;
      *
-     * @param camelMessage
+     * @param camelMessage the message from camel
      * @return message to be sent to GCM;
      */
     private GCMBody getMessageFromHeaders(Message camelMessage) {

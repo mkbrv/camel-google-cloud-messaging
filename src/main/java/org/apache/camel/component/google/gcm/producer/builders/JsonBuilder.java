@@ -4,7 +4,9 @@ import org.apache.camel.component.google.gcm.model.GCMBody;
 import org.apache.camel.component.google.gcm.producer.constants.Util;
 import org.json.simple.JSONValue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.Map;
 
@@ -15,13 +17,13 @@ import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.*;
  */
 public class JsonBuilder extends AbstractBuilder {
 
-    private Set<String> registrationIds;
+    private List<String> registrationIds;
     private Map<Object, Object> jsonRequest;
 
 
     public JsonBuilder(GCMBody message, Set<String> registrationIds) {
         super(message);
-        this.registrationIds = registrationIds;
+        this.registrationIds = new ArrayList<String>(registrationIds);//because the simple json has issues with sets;
         jsonRequest = new HashMap<>();
     }
 

@@ -1,7 +1,7 @@
 package org.apache.camel.component.google.gcm.producer.parsers;
 
+import org.apache.camel.component.google.gcm.producer.exceptions.CustomParserException;
 import org.apache.camel.component.google.gcm.producer.exceptions.InvalidRequestException;
-import org.apache.camel.component.google.gcm.model.GCMResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,53 +11,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.TOKEN_CANONICAL_REG_ID;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.TOKEN_ERROR;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.TOKEN_MESSAGE_ID;
+import java.util.Map;
 
 /**
- * Parsing an HTTP Post request;
- * Created by miki on 16.04.2015.
+ * Created by miki on 19.04.2015.
  */
-public class SimplePostResponseParser {
+public abstract class AbstractParser {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SimplePostResponseParser.class);
-
-    public GCMResponse parseResponseString(String responseBody) throws IOException {
-        String[] lines = responseBody.split("\n");
-        if (lines.length == 0 || lines[0].equals("")) {
-            throw new IOException("Received empty response from GCM service.");
-        }
-        String firstLine = lines[0];
-        String[] responseParts = split(firstLine);
-        String token = responseParts[0];
-        String value = responseParts[1];
-        switch (token) {
-            case TOKEN_MESSAGE_ID:
-                GCMResponse.Builder builder = new GCMResponse.Builder().messageId(value);
-                // check for canonical registration id
-                if (lines.length > 1) {
-                    String secondLine = lines[1];
-                    responseParts = split(secondLine);
-                    token = responseParts[0];
-                    value = responseParts[1];
-                    if (token.equals(TOKEN_CANONICAL_REG_ID)) {
-                        builder.canonicalRegistrationId(value);
-                    } else {
-                        LOG.warn("Invalid response from GCM: {}", responseBody);
-                    }
-                }
-                GCMResponse result = builder.build();
-                LOG.debug("GCMResponse created succesfully {},", result);
-                return result;
-            case TOKEN_ERROR:
-                return new GCMResponse.Builder().errorCode(value).build();
-            default:
-                throw new IOException("Invalid response from GCM: " + responseBody);
-        }
-    }
-
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractParser.class);
 
     public String getResponseFromConnection(HttpURLConnection conn) throws IOException {
         int status = conn.getResponseCode();
@@ -89,7 +50,7 @@ public class SimplePostResponseParser {
         return responseBody;
     }
 
-    private static String getAndClose(InputStream stream) throws IOException {
+    protected String getAndClose(InputStream stream) throws IOException {
         try {
             return getString(stream);
         } finally {
@@ -99,7 +60,7 @@ public class SimplePostResponseParser {
         }
     }
 
-    private String[] split(String line) throws IOException {
+    protected String[] split(String line) throws IOException {
         String[] split = line.split("=", 2);
         if (split.length != 2) {
             throw new IOException("Received invalid response line from GCM: " + line);
@@ -107,7 +68,7 @@ public class SimplePostResponseParser {
         return split;
     }
 
-    private static void close(Closeable closeable) {
+    protected void close(Closeable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
@@ -125,7 +86,7 @@ public class SimplePostResponseParser {
      * <p/>
      * If the stream is {@literal null}, returns an empty string.
      */
-    protected static String getString(InputStream stream) throws IOException {
+    protected String getString(InputStream stream) throws IOException {
         if (stream == null) {
             return "";
         }
@@ -145,4 +106,24 @@ public class SimplePostResponseParser {
         }
         return content.toString();
     }
+
+    protected Number getNumber(Map<?, ?> json, String field) {
+        Object value = json.get(field);
+        if (value == null) {
+            throw new CustomParserException("Missing field: " + field);
+        }
+        if (!(value instanceof Number)) {
+            throw new CustomParserException("Field " + field +
+                    " does not contain a number: " + value);
+        }
+        return (Number) value;
+    }
+
+    protected IOException newIoException(String responseBody, Exception e) {
+        String msg = "Error parsing JSON response (" + responseBody + ")";
+        LOG.warn(msg, e);
+        return new IOException(msg + ":" + e);
+    }
+
+
 }

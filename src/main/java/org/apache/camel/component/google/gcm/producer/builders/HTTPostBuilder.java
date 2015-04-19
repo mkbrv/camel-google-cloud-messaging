@@ -14,13 +14,13 @@ import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.*;
 /**
  * Created by miki on 15.04.2015.
  */
-public class PlainTextBodyBuilder extends AbstractBuilder {
+public class HTTPostBuilder extends AbstractBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PlainTextBodyBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HTTPostBuilder.class);
 
     private StringBuilder body;
 
-    public PlainTextBodyBuilder(GCMBody message, String registrationId) {
+    public HTTPostBuilder(GCMBody message, String registrationId) {
         super(message);
         body = new StringBuilder(PARAM_REGISTRATION_ID).append('=').append(Util.nonNull(registrationId));
     }
@@ -35,7 +35,7 @@ public class PlainTextBodyBuilder extends AbstractBuilder {
         return body.toString();
     }
 
-    protected PlainTextBodyBuilder addPayLoad() {
+    protected HTTPostBuilder addPayLoad() {
         for (Map.Entry<String, String> entry : this.message.getData().entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -55,7 +55,7 @@ public class PlainTextBodyBuilder extends AbstractBuilder {
     }
 
 
-    protected PlainTextBodyBuilder addTimeToLive() {
+    protected HTTPostBuilder addTimeToLive() {
         Integer timeToLive = this.message.getTimeToLive();
         if (timeToLive != null) {
             addParameter(PARAM_TIME_TO_LIVE, Integer.toString(timeToLive));
@@ -63,7 +63,7 @@ public class PlainTextBodyBuilder extends AbstractBuilder {
         return this;
     }
 
-    protected PlainTextBodyBuilder addRestrictedPackageName() {
+    protected HTTPostBuilder addRestrictedPackageName() {
         String restrictedPackageName = this.message.getRestrictedPackageName();
         if (restrictedPackageName != null) {
             addParameter(PARAM_RESTRICTED_PACKAGE_NAME, restrictedPackageName);
@@ -71,7 +71,7 @@ public class PlainTextBodyBuilder extends AbstractBuilder {
         return this;
     }
 
-    protected PlainTextBodyBuilder addCollapseKey() {
+    protected HTTPostBuilder addCollapseKey() {
         String collapseKey = this.message.getCollapseKey();
         if (collapseKey != null) {
             addParameter(PARAM_COLLAPSE_KEY, collapseKey);
@@ -79,14 +79,14 @@ public class PlainTextBodyBuilder extends AbstractBuilder {
         return this;
     }
 
-    protected PlainTextBodyBuilder addDryRun() {
+    protected HTTPostBuilder addDryRun() {
         if (this.message.isDryRun() != null) {
             addParameter(PARAM_DRY_RUN, this.message.isDryRun() ? "1" : "0");
         }
         return this;
     }
 
-    protected PlainTextBodyBuilder addDelayWhileIdle() {
+    protected HTTPostBuilder addDelayWhileIdle() {
         if (this.message.isDelayWhileIdle() != null) {
             addParameter(PARAM_DELAY_WHILE_IDLE, this.message.isDelayWhileIdle() ? "1" : "0");
         }
