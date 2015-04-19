@@ -15,15 +15,10 @@ import java.util.HashSet;
  */
 public class SimpleSenderTest extends AbstractGCMTestSupport {
 
-    private String testRegID;
-
-    @Before
-    public void setUP() throws Exception {
-        testRegID = testProperties.getProperty("test.regid");
-    }
 
     @Test
     public void testSimpleNotification() throws Exception {
+        final String testRegID = testProperties.getProperty("test.regid");
         GCMBody message = new GCMBody.Builder()
                 .addData("test", "test")
                 .collapseKey("asdasd")
@@ -40,6 +35,7 @@ public class SimpleSenderTest extends AbstractGCMTestSupport {
 
     @Test
     public void testMultiCast() throws Exception {
+        final String testRegID = testProperties.getProperty("test.regid");
         GCMBody message = new GCMBody.Builder()
                 .addData("test", "test")
                 .collapseKey("asdasd")

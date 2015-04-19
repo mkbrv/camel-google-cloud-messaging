@@ -54,7 +54,7 @@ public class AbstractGCMTestSupport extends CamelTestSupport {
     @Override
     public boolean isCreateCamelContextPerClass() {
         // only create the context once for this class
-        return true;
+        return false;
     }
 
     @SuppressWarnings("unchecked")

@@ -15,7 +15,15 @@
     <version>1.0-SNAPSHOT</version>
 
     <name>Camel GoogleCloudMessaging Component</name>
-    <url>http://www.myorganization.org</url>
+    <url>http://softwareengineer.ro</url>
+
+    <developers>
+        <developer>
+            <id>mikibrv</id>
+            <name>Csere Miklos</name>
+            <email>miki@softwareengineer.ro</email>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -30,7 +38,7 @@
             <version>${project.parent.version}</version>
         </dependency>
 
-        <!-- Simple JSON Lib -->
+        <!-- Simple JSON Lib the only dependency -->
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
@@ -106,4 +114,24 @@
         </plugins>
     </build>
 
+    <scm>
+        <connection>scm:git:git//github.com/mikibrv/camel-google-cloud-messaging.git</connection>
+        <developerConnection>scm:git:git@github.com:mikibrv/camel-google-cloud-messaging.git</developerConnection>
+        <url>https://github.com/mikibrv/camel-google-cloud-messaging</url>
+        <tag>HEAD</tag>
+    </scm>
+
+
+    <distributionManagement>
+        <repository>
+            <id>townite-releases</id>
+            <url>http://nexus.codegile.com/nexus/content/repositories/releases</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>townite-snapshots</id>
+            <name>Internal Snapshots</name>
+            <url>http://nexus.codegile.com/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
