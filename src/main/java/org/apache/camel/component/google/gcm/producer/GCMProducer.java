@@ -7,6 +7,7 @@ import org.apache.camel.component.google.gcm.model.GCMBody;
 import org.apache.camel.component.google.gcm.producer.constants.CamelHeaderConstants;
 import org.apache.camel.component.google.gcm.producer.http.RetrySender;
 import org.apache.camel.impl.DefaultProducer;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,9 +54,8 @@ public abstract class GCMProducer extends DefaultProducer implements IGCMProduce
     protected final GCMEndpoint endpoint;
 
     /**
-     *
      * @param endpoint
-     * @param apiKey from google
+     * @param apiKey   from google
      */
     public GCMProducer(GCMEndpoint endpoint, final String apiKey) {
         super(endpoint);
@@ -125,7 +125,8 @@ public abstract class GCMProducer extends DefaultProducer implements IGCMProduce
                 //if it's not a map there is nothing I can do with it
                 builder.addData((Map<String, String>) payLoad);
             } else {
-                builder.addData(CamelHeaderConstants.DATA, payLoad.toString());
+                //let's make a JSON
+                builder.addData(CamelHeaderConstants.DATA, JSONValue.toJSONString(payLoad));
             }
         }
 

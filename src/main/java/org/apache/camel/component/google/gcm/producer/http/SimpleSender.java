@@ -39,11 +39,12 @@ public class SimpleSender extends GCMProducer {
     @Override
     public MultiCastResponse send(GCMBody message, Set<String> registrationIdList) {
         String requestBody = new JsonBuilder(message, registrationIdList).build();
+        LOG.info("GCM: sending a multicast with Request body: {}", requestBody);
         try {
             HttpURLConnection conn = post(GCM_SEND_ENDPOINT, "application/json", requestBody);
             MultiCastParser parser = new MultiCastParser();
             String response = parser.getResponseFromConnection(conn);
-            LOG.info("GCM: received response {}", response);
+            LOG.info("GCM: Multicast received response {}", response);
             return parser.parseResponseString(response);
         } catch (Exception e) {
             LOG.error("Exception posting to GCM", e);
@@ -64,7 +65,7 @@ public class SimpleSender extends GCMProducer {
             HttpURLConnection conn = post(GCM_SEND_ENDPOINT, "application/x-www-form-urlencoded;charset=UTF-8", requestBody);
             SimpleParser parser = new SimpleParser();
             String response = parser.getResponseFromConnection(conn);
-            LOG.info("GCM: received response {}", response);
+            LOG.info("GCM: Post received response {}", response);
             return parser.parseResponseString(response);
         } catch (Exception e) {
             LOG.error("Exception posting to GCM", e);

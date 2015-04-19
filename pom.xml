@@ -15,7 +15,7 @@
 
     <groupId>org.apache.camel</groupId>
     <artifactId>camel-google-cloud-messaging</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>Camel :: Google Cloud Messaging</name>
     <description>Camel Google Cloud Messaging support</description>
@@ -111,17 +111,4 @@
         <tag>HEAD</tag>
     </scm>
 
-
-    <distributionManagement>
-        <repository>
-            <id>townite-releases</id>
-            <url>http://nexus.codegile.com/nexus/content/repositories/releases</url>
-        </repository>
-
-        <snapshotRepository>
-            <id>townite-snapshots</id>
-            <name>Internal Snapshots</name>
-            <url>http://nexus.codegile.com/nexus/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>

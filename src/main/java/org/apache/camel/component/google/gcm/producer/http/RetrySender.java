@@ -13,6 +13,7 @@ import java.util.Set;
  * Also, not singleton. will be instantiated every time but with the singleton decorator param;
  * Retry functionality decorator over SimpleSender.;
  * Created by miki on 15.04.2015.
+ * TODO: implement this;
  */
 public class RetrySender implements IGCMProducer {
 
@@ -26,12 +27,13 @@ public class RetrySender implements IGCMProducer {
 
     @Override
     public MultiCastResponse send(GCMBody message, Set<String> regIds) {
-        return null;
+
+        return simpleSender.send(message, regIds);
     }
 
     @Override
     public GCMResponse send(GCMBody message, String regId) {
-        return null;
+        return simpleSender.send(message, regId);
     }
 
     protected void sleep(long millis) {
