@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.TOKEN_CANONICAL_REG_ID;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.TOKEN_ERROR;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.TOKEN_MESSAGE_ID;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.TOKEN_CANONICAL_REG_ID;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.TOKEN_ERROR;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.TOKEN_MESSAGE_ID;
 
 /**
  * Parsing an HTTP Post request;

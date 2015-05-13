@@ -18,7 +18,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Set;
 
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.GCM_SEND_ENDPOINT;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.GCM_SEND_ENDPOINT;
 
 /**
  * Created by miki on 15.04.2015.

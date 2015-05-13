@@ -9,7 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.*;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.*;
 
 /**
  * Created by miki on 15.04.2015.

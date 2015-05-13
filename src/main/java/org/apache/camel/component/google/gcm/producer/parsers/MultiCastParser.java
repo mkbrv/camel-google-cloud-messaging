@@ -11,14 +11,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.JSON_CANONICAL_IDS;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.JSON_ERROR;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.JSON_FAILURE;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.JSON_MESSAGE_ID;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.JSON_MULTICAST_ID;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.JSON_RESULTS;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.JSON_SUCCESS;
-import static org.apache.camel.component.google.gcm.oldclient.GoogleConstants.TOKEN_CANONICAL_REG_ID;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.JSON_CANONICAL_IDS;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.JSON_ERROR;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.JSON_FAILURE;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.JSON_MESSAGE_ID;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.JSON_MULTICAST_ID;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.JSON_RESULTS;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.JSON_SUCCESS;
+import static org.apache.camel.component.google.gcm.configuration.GoogleConstants.TOKEN_CANONICAL_REG_ID;
 
 /**
  * Created by miki on 19.04.2015.

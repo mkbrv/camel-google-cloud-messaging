@@ -1,4 +1,4 @@
-package org.apache.camel.component.google.gcm.oldclient;
+package org.apache.camel.component.google.gcm.configuration;
 
 /**
  * Created by miki on 02.04.2015.

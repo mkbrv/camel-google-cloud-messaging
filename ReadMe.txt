@@ -1,13 +1,7 @@
 Camel Component Project
 =======================
 
-This project is a template of a Camel component.
+This project is intended to solve the connectivity with Google Cloud Messaging.
 
-To build this project use
-
-    mvn install
-
-For more help see the Apache Camel documentation:
-
-    http://camel.apache.org/writing-components.html
-    
+Uses GCM to push notifications to devices by using a regID, or to broadcast to multiple devices.
+Failure Handler and retry mechanism included.
