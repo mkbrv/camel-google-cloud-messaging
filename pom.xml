@@ -5,15 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
 
-   <!--<parent>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>components</artifactId>
-        <version>2.15.1</version>
-    </parent>
-    -->
+    <!--<parent>
+         <groupId>org.apache.camel</groupId>
+         <artifactId>components</artifactId>
+         <version>2.16.1</version>
+     </parent>
+     -->
 
 
-    <groupId>org.apache.camel</groupId>
+    <groupId>com.github.mikibrv</groupId>
     <artifactId>camel-google-cloud-messaging</artifactId>
     <version>1.0.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
@@ -28,8 +28,17 @@
         </developer>
     </developers>
 
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+
     <properties>
-        <camel.version>2.15.1</camel.version>
+        <camel.version>2.16.1</camel.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -55,7 +64,7 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-test</artifactId>
-            <version>2.15.1</version>
+            <version>${camel.version}</version>
             <scope>test</scope>
         </dependency>
 
